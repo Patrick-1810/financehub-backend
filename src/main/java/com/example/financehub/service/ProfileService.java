@@ -4,6 +4,7 @@ import com.example.financehub.dto.AuthDTO;
 import com.example.financehub.dto.ProfileDTO;
 import com.example.financehub.entity.ProfileEntity;
 import com.example.financehub.repository.ProfileRepository;
+import com.example.financehub.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,7 @@ public class ProfileService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     public ProfileDTO registerProfile(ProfileDTO profileDTO) {
         ProfileEntity newProfile = toEntity(profileDTO);
@@ -105,8 +107,9 @@ public class ProfileService {
     public Map<String, Object> authenticateAndGenerateToken(AuthDTO authDTO) {
          try {
              authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword()));
+             String token = jwtUtil.generateToken(authDTO.getEmail());
              return Map.of(
-                     "token", "JWT token",
+                     "token", token,
                      "user" , getPublicProfile(authDTO.getEmail())
              );
          } catch (Exception e) {
